@@ -22,13 +22,13 @@ if not st.session_state.auth:
 
 st.title("🚚 Hybrid WMS Dashboard")
 
-# ✅ Auto-generate JSON if missing (fixes your issue)
+# ✅ If data doesn't exist, generate it automatically
 if not os.path.exists(DATA_FILE):
     st.info("⏳ Generating first report...")
     import run_hybrid_full
     run_hybrid_full.main()
 
-# Load JSON → DataFrame
+# Load JSON
 with open(DATA_FILE) as f:
     data = json.load(f)
 
@@ -50,7 +50,7 @@ st.subheader("📊 Total Issues by OU")
 chart_df = df.select(["ou_name", "total_issues"]).to_pandas()
 st.bar_chart(chart_df, x="ou_name", y="total_issues")
 
-# CSV download
+# Download
 csv = hist.write_csv()
 st.download_button(
     "Download History CSV",
