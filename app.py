@@ -27,18 +27,18 @@ if not st.session_state.auth:
 # -------------------------
 st.title("🚚 Hybrid WMS Dashboard")
 
+# ✅ Auto-generate data if missing
 if not os.path.exists(DATA_FILE):
-    st.warning("Run run_hybrid_full.py first to generate data.")
-    st.stop()
+    st.info("⏳ Generating first report...")
+    import run_hybrid_full
+    run_hybrid_full.main()
 
 # Load JSON → DataFrame
 with open(DATA_FILE) as f:
     data = json.load(f)
 
 df = pl.DataFrame(data)
-df = df.with_columns([
-    pl.col("run_time").str.strptime(pl.Datetime)
-])
+df = df.with_columns(pl.col("run_time").str.strptime(pl.Datetime))
 
 st.subheader("Latest Run")
 st.dataframe(df)
@@ -56,8 +56,6 @@ else:
 # Chart
 # -------------------------
 st.subheader("📊 Total Issues by OU")
-
-# Polars → pandas needed for Streamlit chart
 chart_df = df.select(["ou_name", "total_issues"]).to_pandas()
 st.bar_chart(chart_df, x="ou_name", y="total_issues")
 
@@ -65,4 +63,4 @@ st.bar_chart(chart_df, x="ou_name", y="total_issues")
 # CSV Download
 # -------------------------
 csv = hist.write_csv()
-st
+st.download_button("Download History CSV", csv, "history.csv", "text/csv")
